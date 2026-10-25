@@ -1,0 +1,20 @@
+    Project Scopes:
+// Things i want this Project to do
+
+1. Use the GW2 API to track player information
+    - display currency current items
+    - content completition
+    - track goals like crafting and resource gathering
+
+2. Have an ability for building gear templeates stored on a form like area where comments can be left and a like counter
+    - similar to snowcross but a user can build its own (like the Arcane Oddesy tool)
+
+3. Make it secure
+    - Have hashed password 
+    - Log in system
+    - ensure API has a rate limit
+    - ensure the user data is protected from all possible attacks
+
+4. Integrate an AI chatbot // Low Priority
+    - able to look at your inventory
+    - give recommendations
