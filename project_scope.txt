@@ -18,3 +18,17 @@
 4. Integrate an AI chatbot // Low Priority
     - able to look at your inventory
     - give recommendations
+
+
+
+Table (SQL Structure)   
+    tbl_USER
+        User_ID <PK> AutoNum
+        Email
+        Username
+        Password //hashed
+    
+    tbl_API
+        API_ID <PK> AutoNum
+        User_ID <FK>
+        API //hashed
