@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS main_db;
+USE main_db;
+
+
 CREATE TABLE tbl_users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
