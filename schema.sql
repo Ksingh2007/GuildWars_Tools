@@ -11,6 +11,7 @@ CREATE TABLE tbl_users (
     PRIMARY KEY (user_id)
 );
 
+-- Store GW2 Account Information
 CREATE TABLE tbl_gw2_accounts (
     account_id INT AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -22,6 +23,7 @@ CREATE TABLE tbl_gw2_accounts (
     FOREIGN KEY (user_id) REFERENCES tbl_users(user_id)
 );
 
+-- Store Static GW2 Item data to prevent excessive API calls and to allow for more complex queries and filtering.
 CREATE TABLE tbl_gw2_item (
     item_id INT,
     item_name VARCHAR(100) NOT NULL,
@@ -40,6 +42,7 @@ CREATE TABLE tbl_gw2_item (
     PRIMARY KEY (item_id)
 );
 
+-- Child Table for tbl_gw2_item to store additional details about items that have them such as armor and weapons.
 CREATE TABLE tbl_item_details (
     item_id INT,
     item_sub_type VARCHAR(50) NULL,
@@ -58,3 +61,14 @@ CREATE TABLE tbl_item_details (
 -- from the API directly into MySQL JSON columns, 
 -- or it will trigger a database syntax error. 
 -- Ensure empty values are converted to null first.
+
+-- Store Static GW2 Currency data
+CREATE TABLE tbl_gw2_currency (
+    currency_id INT,
+    currency_name VARCHAR(100) NULL,
+    currency_description TEXT NULL,
+    currency_order INT NULL,
+    currency_icon_url VARCHAR(255) NULL,
+
+    PRIMARY KEY (currency_id)
+)
