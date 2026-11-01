@@ -57,6 +57,14 @@ CREATE TABLE tbl_item_details (
     FOREIGN KEY (item_id) REFERENCES tbl_gw2_item(item_id) ON DELETE CASCADE
 );
 
+CREATE TABLE tbl_item_stats (
+    item_stat_id INT,
+    item_stat_name VARCHAR(100) NULL,
+    item_stat_attributes JSON NULL,
+
+    PRIMARY KEY (item_stat_id)
+);
+
 -- WARNING: Do not insert raw empty strings ("") 
 -- from the API directly into MySQL JSON columns, 
 -- or it will trigger a database syntax error. 
@@ -71,4 +79,5 @@ CREATE TABLE tbl_gw2_currency (
     currency_icon_url VARCHAR(255) NULL,
 
     PRIMARY KEY (currency_id)
-)
+);
+
