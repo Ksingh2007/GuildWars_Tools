@@ -49,4 +49,31 @@ NEVER_FETCH = {
 
 
 session = requests.Session()
+session.headers["X-Schema-Version"] = "latest" # Get the latest version
 
+def get(path, **params):
+    url = f"{API}/{path}"
+
+    for attempts in range(6):
+        try:
+            r = session.get(url, params=params, timeout=60)
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching ({e}), retrying...", file=sys.stderr)
+            time.sleep(2 ** attempts)  # Exponential backoff
+            
+            continue
+        if r.status_code == 429:
+            wait = int(r.headers.get("Retry-After", 15))
+            print(f"Rate limited, waiting {wait}, seconds...")
+            time.sleep(wait)
+            
+            continue
+
+        if r.status_code >= 500:
+            print(f"Serever error ({r.status_code}), retrying...", file=sys.stderr)
+            time.sleep(2 ** attempts)
+
+            continue
+        time.sleep(0.12) # Sleep for 120ms to avoid rate limiting
+        return r.status_code, r
+    return 0, None
