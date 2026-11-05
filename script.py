@@ -11,7 +11,9 @@ import requests # to make http requests to the API
 from pathlib import Path # build files and folders
 
 API = "https://api.guildwars2.com/v2"
-PAGE_SIZE = 200 # The maximum page size for the API is 200, so we will use that to minimize the number of requests we need to make
+PAGE_SIZE = 200 # The maximum page size for the API is 300, so we will use that to minimize the number of requests we need to make
+                # The refill rate for tokens is 5 tokens per second, 300 per minute
+
 
 # Endpoints in which data is not static and needs to be updated frequently or on a seasonal basis.
 DYNAMIC_ENDPOINTS = [
@@ -56,24 +58,33 @@ def get(path, **params):
 
     for attempts in range(6):
         try:
-            r = session.get(url, params=params, timeout=60)
+            output = session.get(url, params=params, timeout=60)
         except requests.exceptions.RequestException as e:
             print(f"Error fetching ({e}), retrying...", file=sys.stderr)
             time.sleep(2 ** attempts)  # Exponential backoff
             
             continue
-        if r.status_code == 429:
-            wait = int(r.headers.get("Retry-After", 15))
+        if output.status_code == 429:
+            wait = int(output.headers.get("Retry-After", 15))
             print(f"Rate limited, waiting {wait}, seconds...")
             time.sleep(wait)
             
             continue
 
-        if r.status_code >= 500:
-            print(f"Serever error ({r.status_code}), retrying...", file=sys.stderr)
+        if output.status_code >= 500:
+            print(f"Serever error ({output.status_code}), retrying...", file=sys.stderr)
             time.sleep(2 ** attempts)
 
             continue
-        time.sleep(0.12) # Sleep for 120ms to avoid rate limiting
-        return r.status_code, r
+        time.sleep(0.2) # Sleep for 200ms to avoid rate limiting
+        return output.status_code, output
     return 0, None
+
+def fetch(path, **params):
+    status, output = get(path, **params)
+    if output is None:
+        return status,None, {}
+    try:
+        return status, output.json(), output.headers
+    except ValueError:
+        return status, None, output.headers
