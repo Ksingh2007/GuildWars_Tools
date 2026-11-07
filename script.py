@@ -7,10 +7,11 @@ import json
 import time # have a rest time between requests to avoid rate limiting
 import sys
 import argparse
+import re
 import requests # to make http requests to the API
 from pathlib import Path # build files and folders
 
-API = "https://api.guildwars2.com/v2"
+API = "https://api.guildwars2.com"
 PAGE_SIZE = 200 # The maximum page size for the API is 300, so we will use that to minimize the number of requests we need to make
                 # The refill rate for tokens is 5 tokens per second, 300 per minute
 
@@ -88,3 +89,38 @@ def fetch(path, **params):
         return status, output.json(), output.headers
     except ValueError:
         return status, None, output.headers
+
+def list_endpoint(): # Discovers and lists all available enpoints
+    
+    status, output = get("v2")
+
+    if status != 200 or output is None: #Check if request was successful.
+        sys.exit(f"Could not fetch endpoint list, status code: {status}")
+
+    seen, endpoints = set(), [] # seen tracks enpoints visited, enpoints stores the endpoints and their flags
+    in_list = False 
+
+    for line in output.text.splitlines():
+        if "paths are exposed" in line:
+            in_list = True
+            continue
+
+        if not in_list:
+            continue
+
+        if line.startswith("Key:"):
+            break
+
+        m = re.match(r"\s*/v2/(\S+)(?:\s+\[([a-z,]+)\])?\s*$", line)
+        if not m:
+            continue
+
+        path = m.group(1)
+        flags = {f.strip() for f in m.group(2).split(",")} if m.group(2) else set()
+
+        if path not in seen:
+            seen.add(path)
+            endpoints.append((path, flags))
+
+    return endpoints
+
