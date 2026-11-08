@@ -124,3 +124,32 @@ def list_endpoint(): # Discovers and lists all available enpoints
 
     return endpoints
 
+def fetch_all(path, ids, lang):
+    status, body, headers = fetch(path, page=0, page_size=PAGE_SIZE, lang = lang)
+
+    if status == 200 and isinstance(body, list) and "X-Page-Total" in headers:
+        results = list(body)
+        total_pages = int(headers["X-Page-Total"])
+
+        for page in range(1, total_pages):
+            status, body, headers = fetch(path, page=page, page_size=PAGE_SIZE, lang = lang)
+
+            if status != 200 or not isinstance(body, list):
+                print(f"Error fetching page {page} of {path}, status code: {status}", file=sys.stderr)
+                break
+
+            results.extend(body)
+        return results
+
+    results = []
+
+    for i in range (0, len(ids), PAGE_SIZE):
+        chunk = ids[i:i + PAGE_SIZE]
+        status, body, headers = fetch(path, ids=",".join(map(str, chunk)), lang = lang)
+
+        if status == 200 and isinstance(body, list):
+            results.extend(body)
+
+        else:
+            return ids
+    return results
