@@ -153,3 +153,13 @@ def fetch_all(path, ids, lang):
         else:
             return ids
     return results
+
+# Build Path
+def out_file(folder, name):
+    return folder / f"{name.replace('/', '__')}.json"
+
+# Save data to json file and stores them 
+def save(folder, name, data):
+    out_file(folder, name).write_text(
+        json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8"
+    )
