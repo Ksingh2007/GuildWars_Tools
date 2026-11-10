@@ -163,3 +163,23 @@ def save(folder, name, data):
     out_file(folder, name).write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8"
     )
+
+def download(name, folder, lang):
+    if out_file(folder, name).exists():
+        print(f" = {name}: already downloaded")
+        return False
+
+    status, body, _ = fetch(f"/v2/{name}", lang=lang)
+    if status != 200 or body is None:
+        print(f"    - {name}: skipped (status {status})")
+        return False
+
+    if isinstance(body, list) and body:
+        body = fetch_all(f"/v2/{name}", body, lang)
+
+    save(folder, name, body)
+    count = len(body) if isinstance(body,(list, dict)) else 1
+    print(f" + {name}: saved ({count} entries)")
+    
+    return True
+
