@@ -238,5 +238,5 @@ def run(langs, out_root, include_volatile):
             for c in continents:
                 cid = c["id"] if isinstance(c, dict) else c
                 name = f"continents/{cid}/floors"
-                if out_file(folder, name).exists()
+                if out_file(folder, name).exists():
                     continue
