@@ -183,3 +183,60 @@ def download(name, folder, lang):
     
     return True
 
+def run(langs, out_root, include_volatile):
+    endpoints = list_endpoint()
+    print(f"{len(endpoints)} endpoints listed by /v2")
+
+    wanted = []
+
+    for path, flags in endpoints:
+        if flags & ALWAYS_SKIP_FLAGS:
+            print(f" - {path}: skipped (auth / disabled)")
+        
+        elif path.startswith(AUTH_PREFIXES):
+            print(f" - {path}: skipped (account data)")
+
+        elif ":" in path:
+            print(f" - {path}: skiped (needs id)")
+
+        elif path in NEVER_FETCH:
+            print(f" - {path}: skipped (parent/ needs search term)")
+
+        elif not include_volatile and path.startswith(DYNAMIC_ENDPOINTS):
+            print(f" - {path}: skipped (dynamic)")
+
+        else: 
+            wanted.append((path, "l" in flags ))
+
+        print(f"{len(wanted)} enpoints to download\n")
+
+    common = out_root / "common"
+    common.mkdir(parents=True, exist_ok=True)
+    print("[common] language-independent endpoints")
+    for path, locale_aware in wanted:
+        if not locale_aware:
+            download(path, common, None)
+
+    status, body, _ = fetch("/v2/emblem")
+    if status == 200 and isinstance(body, list):
+        for sub in body:
+            if isinstance(sub, str):
+                download(f"emblem/{sub}", common, None)
+
+    for lang in langs: 
+        folder = out_root / lang
+        folder.mkdir(parents=True, exist_ok=True)
+        print(f"\n[{lang}] locale_aware endpoints")
+        
+        for path, locale_aware in wanted:
+            if locale_aware:
+                download(path, folder, lang)
+
+        cont_file = out_file(folder, "continents")
+        if cont_file.exist():
+            continents = json.loads(cont_file.read_text(encoding="utf-8"))
+            for c in continents:
+                cid = c["id"] if isinstance(c, dict) else c
+                name = f"continents/{cid}/floors"
+                if out_file(folder, name).exists()
+                    continue
