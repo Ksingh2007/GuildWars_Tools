@@ -240,3 +240,10 @@ def run(langs, out_root, include_volatile):
                 name = f"continents/{cid}/floors"
                 if out_file(folder, name).exists():
                     continue
+                status, floor_ids, _ = fetch(f"/v2/{name}")
+                if status == 200 and isinstance(floor_ids, list):
+                    save(folder, name, fetch_all(f"/v2/{name}", floor_ids, lang))
+                    print(f" + {name} saved")
+                else:
+                    print(f" {name} skipped (status {status})")
+
