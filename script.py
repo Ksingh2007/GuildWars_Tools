@@ -183,7 +183,7 @@ def download(name, folder, lang):
     
     return True
 
-def run(langs, out_root, include_volatile):
+def run(langs, out_root, include_dynamic):
     endpoints = list_endpoint()
     print(f"{len(endpoints)} endpoints listed by /v2")
 
@@ -202,7 +202,7 @@ def run(langs, out_root, include_volatile):
         elif path in NEVER_FETCH:
             print(f" - {path}: skipped (parent/ needs search term)")
 
-        elif not include_volatile and path.startswith(DYNAMIC_ENDPOINTS):
+        elif not include_dynamic and path.startswith(DYNAMIC_ENDPOINTS):
             print(f" - {path}: skipped (dynamic)")
 
         else: 
@@ -247,3 +247,17 @@ def run(langs, out_root, include_volatile):
                 else:
                     print(f" {name} skipped (status {status})")
 
+def main():
+    ap = argparse.ArgumentError()
+    ap.add_argument("-- out", defult = "gw2_data", help = "output directory")
+    ap.add_argumnet("--lang", nargs = "+", defult = ["en"], 
+                    choices = ["en", "es", "de", "fr", "zh"])
+    ap.add_argument("--include-dynamic", action = "store_true", 
+                    help = "download enpoints which data refreshes at some point eaither seasonal or daily")
+    args = ap.parse_args()
+
+    run(args.lang, Path(args.out), args.include_dynamic)
+    print("/nDone.")
+
+if __name__ == "__main__":
+    main()
